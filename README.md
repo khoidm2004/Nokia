@@ -1,13 +1,14 @@
 # MAS — multi-agent coding workflow template
 
-A reusable **analyze → plan → code → test** loop for Claude Code, extracted
-from `Hack4Hum`. One coordinator command drives four subagents, routes by
-task difficulty, and tracks run state on disk so it survives interruptions
-(including rate limits).
+A lean **plan → code** loop for Claude Code, trimmed down to exactly two
+subagents with **fixed models** (no difficulty routing, no model
+escalation). One coordinator command drives both, runs verification itself,
+and tracks run state on disk so it survives interruptions (including rate
+limits).
 
 ```
-analyzer (facts)  ->  planner (steps)  ->  coder (implementation)  ->  tester (PASS/FAIL)
-   opus                 sonnet/opus            sonnet                    sonnet
+planner (investigates + plans)  ->  coder (implements)
+         opus                              sonnet
 ```
 
 ## What's in here
@@ -15,13 +16,11 @@ analyzer (facts)  ->  planner (steps)  ->  coder (implementation)  ->  tester (P
 ```
 .claude/
   agents/
-    analyzer.md    # investigates, writes Artifacts/analysis.md — never plans or edits code
-    planner.md     # turns analysis into an exact step-by-step plan — never edits code
-    coder.md       # implements the plan literally — never escalates to opus
-    tester.md      # runs real commands, reports PASS/FAIL — never fixes code
+    planner.md     # investigates the codebase itself, writes an exact step-by-step plan — never edits code. Fixed: opus
+    coder.md       # implements the plan literally — fixed: sonnet, never escalated
   commands/
-    code-task.md   # the coordinator: /code-task — routes by difficulty, owns state.json
-  statusline.sh    # optional: shows "difficulty | agent | attempt N | failures N/2"
+    code-task.md   # the coordinator: /code-task — fixed planner->coder route, owns state.json, verifies itself
+  statusline.sh    # optional: shows "agent | attempt N | failures N/2"
 CLAUDE.md.template  # drop-in CLAUDE.md with the generic workflow + model-policy
                     # sections, and placeholders for this project's own commands/conventions
 Artifacts/
@@ -33,9 +32,8 @@ findings/
 gitignore.snippet    # optional block if you want this kept out of the project's git history
 ```
 
-These agent/command files are already project-agnostic (no Hack4Hum-specific
-content) — copy them verbatim. The only thing to fill in per-project is
-`CLAUDE.md`.
+These agent/command files are project-agnostic — copy them verbatim. The
+only thing to fill in per-project is `CLAUDE.md`.
 
 ## Setting up a new project
 
@@ -49,8 +47,7 @@ content) — copy them verbatim. The only thing to fill in per-project is
 3. Create `Artifacts/` and `findings/` at the project root (copy the
    `.gitkeep`s, or just `mkdir`).
 4. Decide whether this tooling is local-only or shared with collaborators:
-   - Local-only (matches how Hack4Hum runs it): append `gitignore.snippet`
-     to the project's `.gitignore`.
+   - Local-only: append `gitignore.snippet` to the project's `.gitignore`.
    - Shared: commit `.claude/`, `CLAUDE.md`, and `Artifacts/` as-is.
 5. If using the statusline, point Claude Code's settings at
    `.claude/statusline.sh` (it degrades to an empty line if `jq` is missing
@@ -59,25 +56,27 @@ content) — copy them verbatim. The only thing to fill in per-project is
 ## Running it
 
 1. Copy `Artifacts/TASK.md.template` to `Artifacts/TASK.md`, fill in `#
-   Task`, `# Difficulty` (`easy`/`medium`/`hard`), `# Notes`.
+   Task` and `# Notes` (no difficulty field — the two agents' models are
+   fixed regardless of task size).
 2. Run `/code-task`.
-3. The coordinator reads `Artifacts/TASK.md`, routes to the right subagents,
-   and reports back what changed, the test result, and where the durable
-   record (`Artifacts/state.json`, `Artifacts/dev-diary.md`) landed.
+3. The coordinator reads `Artifacts/TASK.md`, invokes `planner` then
+   `coder`, verifies the result itself, and reports back what changed, the
+   verification result, and where the durable record
+   (`Artifacts/state.json`, `Artifacts/dev-diary.md`) landed.
 
 ## Design notes worth keeping in mind
 
-- **Opus is reserved for thinking, never typing.** The analyzer (on
-  medium/hard) and planner (on hard only) may use Opus; coder and tester
-  never do, even on retries. If a cheap-model step struggles, the fix is a
-  better plan, not a bigger model.
-- **Files, not context, carry state between agents.** The coordinator
-  points the planner at `Artifacts/analysis.md` rather than relaying its
-  contents — keeps each subagent's prompt small and the record durable on
-  disk.
+- **Each agent has exactly one fixed model, no escalation path.** Planner is
+  always Opus, coder is always Sonnet — on a fresh run or a retry. If the
+  coder struggles, the fix is a better plan from the planner, never a bigger
+  model for the coder.
+- **No analyzer, no tester.** The planner investigates the codebase itself
+  before writing the plan; the coordinator (or the coder, as part of
+  implementing) runs verification directly with Bash instead of a third
+  agent.
 - **`Artifacts/` vs `findings/`**: `Artifacts/` is per-run and disposable
-  (gitignored in the source project) — `analysis.md` and `state.json` get
-  overwritten every task. `findings/` is cumulative and durable — write-ups
-  that should survive long after the task that produced them is forgotten.
-- **Two consecutive test failures stop the loop** rather than retrying
-  forever — the coordinator reports and asks, it doesn't grind.
+  (gitignored in the source project) — `state.json` gets overwritten every
+  task. `findings/` is cumulative and durable — write-ups that should
+  survive long after the task that produced them is forgotten.
+- **Two consecutive verification failures stop the loop** rather than
+  retrying forever — the coordinator reports and asks, it doesn't grind.

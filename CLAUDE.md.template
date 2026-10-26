@@ -29,28 +29,24 @@
 <!-- This section and "Model policy" below are the reusable part of this
      template — copy them as-is into every project's CLAUDE.md. They
      describe the coordinator in .claude/commands/code-task.md and the
-     four subagents in .claude/agents/. -->
+     two subagents in .claude/agents/. -->
 
-- Write a task in `Artifacts/TASK.md` with a difficulty (`easy` | `medium` |
-  `hard`) and run `/code-task`.
+- Write a task in `Artifacts/TASK.md` (just `# Task` and `# Notes` — no
+  difficulty field in this setup) and run `/code-task`.
 - Only the coordinator (the `/code-task` command, run in the main session —
   not a subagent) writes `Artifacts/state.json`.
-- Only the analyzer writes `Artifacts/analysis.md` (its findings for the
-  current task; overwritten each run).
-- Only the tester — or the coordinator itself on `easy` tasks — appends to
-  `Artifacts/dev-diary.md`.
-- Agent definitions live in `.claude/agents/` (`analyzer`, `planner`,
-  `coder`, `tester`); the coordinator lives in `.claude/commands/code-task.md`.
-- Routes: `easy` → planner → coder → done (no analyzer, no tester, no
-  retries). `medium` / `hard` → **analyzer → planner → coder → tester** →
-  loop or finish.
-- The analyzer runs first and investigates: it reads the relevant code and
-  data, measures rather than assumes, researches externally when the task
-  needs it, and writes `Artifacts/analysis.md`. It produces **facts, not a
-  plan**, and verifies the claims `TASK.md` itself makes. The planner reads
-  that file directly rather than having it relayed through the coordinator.
-- After 2 failed test runs in a row on `medium`/`hard`, the coordinator stops
-  and asks you instead of retrying again.
+- The coordinator itself appends to `Artifacts/dev-diary.md` once a run
+  finishes (passed, or done-unverified if `CLAUDE.md` has no check
+  commands) — there is no separate tester agent to do it.
+- Agent definitions live in `.claude/agents/` (`planner`, `coder`) — exactly
+  two, nothing else; the coordinator lives in
+  `.claude/commands/code-task.md`.
+- Route (fixed, no difficulty routing): **planner → coder → verify**. The
+  planner investigates the codebase itself and writes the plan; the coder
+  implements it; verification (test/lint/build) is run by the coordinator
+  directly, or by the coder as part of implementing — never a third agent.
+- After 2 failed verification runs in a row, the coordinator stops and asks
+  you instead of retrying again.
 - If an agent dies because the **session/usage limit was hit**, that is a
   pause, not a failure: the coordinator records `status: "paused_rate_limit"`
   in `Artifacts/state.json`, leaves `consecutive_failures` untouched, reports
@@ -59,31 +55,21 @@
   never downgrades the model to get around the limit.
 
 ### Model policy (a constraint, not a default)
-Opus is for **thinking**, never for typing. The reasoning budget is spent
-upstream so the plan is detailed enough for a cheaper model to implement.
+Each agent has exactly one fixed model. It never changes per-call, per
+retry, or because a task "looks hard."
 
-| difficulty | analyzer | planner | coder | tester |
-|---|---|---|---|---|
-| `easy` | *(not run)* | `haiku` | `haiku` | *(not run)* |
-| `medium` | **`opus`** | `sonnet` | `sonnet` | `sonnet` |
-| `hard` | **`opus`** | **`opus`** | `sonnet` | `sonnet` |
+| agent | model |
+|---|---|
+| `planner` | **`opus`** — always |
+| `coder` | **`sonnet`** — always |
 
-- **Only the analyzer and planner may use Opus** — the analyzer on
-  `medium`/`hard`, the planner on **`hard` only**.
-- On `medium` the expensive thinking is the **analysis**. The analyzer still
-  runs on Opus and produces measured facts; the planner's job there is to turn
-  those facts into ordered steps, not to re-derive them. If a `medium` task
-  turns out to need Opus-level planning, that is a signal it was mis-filed —
-  re-file it as `hard`, don't quietly upgrade the planner.
-- **Never run the coder or tester on Opus** — not on a retry, not when a task
+- **The planner always runs on Opus.** It investigates the codebase itself
+  (there is no analyzer) and must produce a plan detailed enough that a
+  cheaper model can implement it literally — exact files, line numbers,
+  values and call shapes, not "configure it appropriately."
+- **The coder always runs on Sonnet** — not on a retry, not when a task
   looks hard. If the coder struggles, the plan wasn't detailed enough: go
-  back to the planner, don't upgrade the coder. On `medium` that re-plan also
-  stays on `sonnet`; the two-consecutive-failure stop above is the backstop,
-  not a model upgrade.
-- Because the coder runs on a smaller model, the planner **must** produce
-  explicit step-by-step instructions — exact files, line numbers, values and
-  call shapes — so the coder can implement literally without re-deriving
-  anything.
-
+  back to the planner, don't upgrade the coder's model. The
+  two-consecutive-failure stop above is the backstop, not a model upgrade.
 - All agents and the coordinator treat this file as the source of truth for
   commands and conventions — they do not duplicate them elsewhere.
