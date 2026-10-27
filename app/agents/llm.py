@@ -8,9 +8,14 @@ from typing import Any
 
 PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
 
-EXTRACTOR_MODEL = "llama-3.3-70b-versatile"
-RELATIONSHIP_MODEL = "llama-3.3-70b-versatile"
-CRITIC_MODEL = "openai/gpt-oss-120b"
+# llama-3.3-70b-versatile was retired from Groq (404 model_not_found,
+# confirmed live on 2026-10-27) - gpt-oss-120b is the strongest model
+# left on this key, so it now does the two reasoning-heavy agents, and
+# gpt-oss-20b keeps the original big/small tiering for the bounded
+# critic retry loop.
+EXTRACTOR_MODEL = "openai/gpt-oss-120b"
+RELATIONSHIP_MODEL = "openai/gpt-oss-120b"
+CRITIC_MODEL = "openai/gpt-oss-20b"
 
 
 class StructuredOutputError(RuntimeError):
