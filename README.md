@@ -1,17 +1,19 @@
-# Nokia — Spec to Abstraction Model
+# SModel — Spec to Abstraction Model
+
+**SModel** (short for Spec Model) turns a requirements / specification
+document into a draft **abstraction model** for software testers: every
+feature in the spec, plus how those features relate (dependencies,
+triggers, shared data, exclusions, sub-features). The goal is a fast
+visual first look before a human writes a test plan — not a verified
+formal model of the system.
 
 Entry for the **Nokia Student Network Challenge 2026**.
-
-A multi-agent CLI that turns a requirements / specification document into a
-draft **abstraction model** for software testers: every feature in the
-spec, plus how those features relate (dependencies, triggers, shared data,
-exclusions, sub-features). The goal is a fast visual first look before a
-human writes a test plan — not a verified formal model of the system.
 
 **Input:** one `.txt` requirements/spec file  
 **Output:** portable `model.html` (feature list + interactive graph) and a
 sibling `model.json`
 
+**Install & usage:** [`instruction.md`](instruction.md)  
 Full technical design: [`artifacts/Architect.md`](artifacts/Architect.md)
 
 ---
