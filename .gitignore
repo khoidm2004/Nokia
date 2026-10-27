@@ -9,3 +9,6 @@ __pycache__/
 .env.*
 outputs/**/*.html
 outputs/**/*.json
+CLAUDE.md
+artifacts/
+findings/
