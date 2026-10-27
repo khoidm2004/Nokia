@@ -70,10 +70,10 @@ export GROQ_API_KEY=gsk_...
 ./run.sh
 # or:
 .venv/bin/python -m app.main \
-  --input samples/sample_spec.txt \
-  --output outputs/model.html
+  --input specs/sample/sample_spec.txt \
+  --output outputs/sample/model.html
 
-# open outputs/model.html in a browser (graph libs load from CDN)
+# open outputs/sample/model.html in a browser (graph libs load from CDN)
 ```
 
 ```bash
@@ -82,6 +82,15 @@ export GROQ_API_KEY=gsk_...
 ```
 
 ---
+
+## Specs and outputs
+
+Spec documents live under `specs/<kind>/*.txt`, one subdirectory per kind
+of spec (e.g. `specs/sample/`, `specs/ecommerce/`) so different test specs
+don't pile up in one flat directory. `./run.sh` mirrors that `<kind>`
+subdirectory under `outputs/` automatically — `outputs/sample/model.html`
+for `specs/sample/...`, `outputs/ecommerce/model.html` for
+`specs/ecommerce/...`, and so on — unless you pass an explicit output path.
 
 ## Project layout
 
@@ -92,8 +101,8 @@ app/
   prompts/         # system prompts for each agent
   graph.py         # LangGraph wiring
   main.py          # CLI entrypoint
-samples/           # example .txt specs
-outputs/           # generated model.html / model.json
+specs/<kind>/      # example .txt specs, one subdirectory per kind
+outputs/<kind>/    # generated model.html / model.json, mirrors specs/<kind>/
 artifacts/         # architecture + task notes for agent-assisted builds
 ```
 

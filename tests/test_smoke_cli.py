@@ -11,7 +11,7 @@ import pytest
 from app.schemas import EDGE_TYPES, AbstractionModel
 
 ROOT = Path(__file__).resolve().parent.parent
-SPEC = ROOT / "samples" / "sample_spec.txt"
+SPEC = ROOT / "specs" / "sample" / "sample_spec.txt"
 
 requires_groq = pytest.mark.skipif(
     not os.environ.get("GROQ_API_KEY"),

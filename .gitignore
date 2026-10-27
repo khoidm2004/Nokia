@@ -7,5 +7,5 @@ __pycache__/
 .venv/
 .env
 .env.*
-outputs/*
-!outputs/.gitkeep
+outputs/**/*.html
+outputs/**/*.json

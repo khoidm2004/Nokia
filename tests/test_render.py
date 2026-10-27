@@ -85,7 +85,7 @@ def test_html_escapes_injected_markup(tmp_path):
 
 def test_sibling_json_written(tmp_path, sample_model):
     state = {
-        "file_path": "samples/sample_spec.txt",
+        "file_path": "specs/sample/sample_spec.txt",
         "html_path": str(tmp_path / "m.html"),
         "features": sample_model.features,
         "relationships": sample_model.relationships,
