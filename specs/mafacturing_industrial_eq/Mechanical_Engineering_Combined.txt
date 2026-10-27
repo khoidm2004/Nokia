@@ -1,0 +1,86 @@
+MECHANICAL ENGINEERING REQUIREMENTS AND SPECIFICATIONS
+Manufacturing and Industrial Equipment — Combined Document
+Document ID: ME-COMBINED-001
+Version: 1.1
+Status: Generic project template — merges ME-REQ-001 and ME-SPEC-001; requires stakeholder validation
+
+1. PURPOSE
+This document combines the stakeholder, functional, performance, safety, mechanical, utility, maintenance, quality, and installation requirements and specifications for manufacturing and industrial equipment into a single reference. It supersedes maintaining the requirements and specifications as two separate documents.
+
+The requirements below are generic. Replace bracketed fields with project-specific values and confirm every item with the relevant stakeholders before approval.
+
+2. WRITING RULES
+- Each item has a unique ID.
+- Use "shall" for a mandatory, verifiable requirement.
+- Each item should describe one obligation and be testable by inspection, analysis, demonstration, or test.
+
+3. EQUIPMENT OVERVIEW AND BUSINESS REQUIREMENTS
+ME-001 — The equipment type, intended process, installation location, and operating mode [manual / semi-automatic / automatic] shall be defined, and the equipment shall perform the production process defined in the approved process description.
+Verification: Design review and process demonstration.
+
+ME-002 — The equipment shall meet the agreed production target of [units per hour] and cycle time of no more than [seconds] under the documented duty cycle [hours per shift; shifts per day].
+Verification: Timed production trial over an agreed number of cycles.
+
+4. FUNCTIONAL REQUIREMENTS
+ME-003 — The equipment shall accept, locate, process, transfer, assemble, inspect, or otherwise handle the specified workpiece according to the approved process sequence, and shall provide the operating modes defined in the approved operating concept: [manual / setup / automatic / maintenance].
+Verification: Functional test and demonstration of each applicable mode.
+
+ME-004 — The equipment shall detect the specified process and equipment faults, shall prevent automatic production from starting unless the required start and protective conditions are satisfied, and shall provide a controlled method to recover from a detected fault without bypassing required protective measures.
+Verification: Fault-injection tests and functional safety validation.
+
+5. PERFORMANCE, MOTION, AND MECHANICAL DESIGN
+ME-005 — The equipment shall achieve positioning accuracy of [value and unit] and repeatability of [value and unit], and shall operate within its maximum rated payload or process load and defined axis travel, speed, and acceleration limits.
+Verification: Measurement using a suitable calibrated instrument; engineering analysis and/or load test.
+
+ME-006 — The frame and load-bearing components shall support all approved static, dynamic, impact, and foreseeable operating loads, built from materials, fasteners, and components selected and rated to approved drawings and tolerances.
+Verification: Structural analysis and dimensional inspection.
+
+ME-007 — Wear components shall have defined inspection and replacement criteria, with lubrication type, points, and intervals defined and documented.
+Verification: Maintenance-document review.
+
+6. UTILITIES AND ENVIRONMENT
+ME-008 — The equipment shall operate within the approved site utility limits for electrical power, compressed air, hydraulics, vacuum, and network services, with supply ratings, utility connections, and stored-energy isolation provisions defined by the responsible engineers.
+Verification: Utility review and commissioning test.
+
+ME-009 — The equipment shall function within the specified ambient temperature, humidity, and dust/moisture/chemical exposure limits for the installation site.
+Verification: Design review and, where necessary, environmental test.
+
+7. SAFETY
+ME-010 — A documented risk assessment shall be completed and maintained throughout the design process, and the applicable safety standards and legal requirements for the installation jurisdiction shall be identified before placing equipment into service.
+Verification: Review of approved risk-assessment and compliance records.
+
+ME-011 — Access to hazardous moving parts shall be prevented or controlled by guards and/or protective devices appropriate to the risks identified in the risk assessment.
+Verification: Inspection and safety validation.
+
+ME-012 — Emergency-stop devices shall be provided where required by the risk assessment, be accessible, and perform the defined stop function; resetting an emergency stop shall not by itself initiate a hazardous restart.
+Verification: Inspection and functional test.
+
+ME-013 — The equipment shall prevent unexpected start-up and provide means to isolate and safely manage hazardous energy sources, including stored energy, during maintenance and servicing.
+Verification: Inspection and maintenance-task validation.
+
+8. ERGONOMICS AND MAINTAINABILITY
+ME-014 — Normal operating controls shall be identifiable and accessible, routine service points shall be reachable without unsafe posture, and a preventive-maintenance plan listing tasks, intervals, and tools shall be provided.
+Verification: Usability review, maintenance demonstration, and document review.
+
+9. QUALITY, ACCEPTANCE, AND INSTALLATION
+ME-015 — The project shall define and execute factory acceptance testing (FAT) and site acceptance testing (SAT) — verifying build, guards, motion, load, and accuracy against approved drawings — including pass/fail criteria and responsible signatories.
+Verification: Approved and completed FAT/SAT records.
+
+ME-016 — The equipment shall be installed in accordance with approved layout, foundation, anchoring, and clearance requirements, and operators and maintenance personnel shall receive training before independent use.
+Verification: Site inspection and training records.
+
+10. DOCUMENTATION
+ME-017 — Approved drawings, bill of materials, risk assessment, operating and maintenance manuals, and FAT/SAT reports shall be delivered before handover.
+Verification: Handover checklist.
+
+11. OPEN ITEMS FOR PROJECT DEFINITION
+Before this document can be approved, define the exact process, workpiece range, production target, duty profile, site utilities and layout, applicable safety standards, and FAT/SAT acceptance criteria.
+
+12. APPROVAL
+Prepared by: [Name / role]
+Reviewed by: [Name / role]
+Approved by: [Name / role]
+Date: [YYYY-MM-DD]
+Revision: [Revision]
+
+END OF DOCUMENT

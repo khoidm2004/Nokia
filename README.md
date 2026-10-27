@@ -110,6 +110,17 @@ a ~60-requirement mechanical-engineering spec) should be split into
 several smaller files — e.g. one per requirement category — each run
 separately rather than widened against a single over-budget call.
 
+The two budgets interact: the relationship mapper's 6,000-token limit is
+driven by how many *edges* the feature set implies, not just the feature
+count. Merging two specs that describe the same system (e.g. a
+requirements doc and a specifications doc for the same equipment) produces
+far more cross-references per feature than two unrelated specs of the same
+size — a merged 24-feature document blew the relationship mapper's budget
+where two separate 20-feature documents on different topics didn't. If
+you're combining overlapping documents into one spec, aim lower than
+20-25 items (we landed on 17 for a merged requirements+specifications
+doc) rather than just summing each document's safe item count.
+
 ## Project layout
 
 ```
