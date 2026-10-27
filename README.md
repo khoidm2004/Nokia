@@ -92,6 +92,24 @@ subdirectory under `outputs/` automatically — `outputs/sample/model.html`
 for `specs/sample/...`, `outputs/ecommerce/model.html` for
 `specs/ecommerce/...`, and so on — unless you pass an explicit output path.
 
+### Spec sizing limits
+
+Besides the 40,000-character single-pass guard (below), each LLM agent
+returns its *entire* JSON result in one Groq call, bounded by a fixed
+output-token budget — currently 8,000 tokens for the extractor
+(`app/agents/extractor.py`) and 6,000 for the relationship mapper
+(`app/agents/relationship_mapper.py`). A spec with many dozens of distinct
+"shall" requirements can exceed that budget mid-generation: the response
+gets cut off before its JSON closes, and Groq returns a `tool_use_failed` /
+"Failed to parse tool call arguments as JSON" error rather than a usable
+(even partial) result.
+
+In practice, keep a single spec file to roughly **20-25 distinct
+extractable requirements**. A denser real-world document (we hit this with
+a ~60-requirement mechanical-engineering spec) should be split into
+several smaller files — e.g. one per requirement category — each run
+separately rather than widened against a single over-budget call.
+
 ## Project layout
 
 ```

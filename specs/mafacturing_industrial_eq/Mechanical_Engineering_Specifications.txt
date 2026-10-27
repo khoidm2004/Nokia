@@ -1,0 +1,69 @@
+MECHANICAL ENGINEERING SPECIFICATIONS
+Manufacturing and Industrial Equipment
+Document ID: ME-SPEC-001
+Version: 1.1
+Status: Generic project template — values require project-specific confirmation
+
+1. PURPOSE AND SCOPE
+This document defines a baseline set of technical specifications for the design, manufacture, installation, commissioning, and verification of manufacturing or industrial equipment. It may be adapted for equipment such as assembly stations, material-handling machinery, production fixtures, packaging equipment, and automated work cells.
+
+This is a generic starting point, not a declaration of compliance or a substitute for a machine-specific risk assessment. Numeric values and applicable standards must be confirmed for the intended machine, process, site, and jurisdiction.
+
+2. EQUIPMENT OVERVIEW
+SP-001 — The equipment type, intended process, installation location, and operating mode [manual / semi-automatic / automatic] shall be defined and documented before design release.
+
+3. DESIGN AND PERFORMANCE
+SP-002 — The equipment shall meet the target production rate and cycle time defined for the agreed duty cycle [hours per shift; shifts per day].
+
+SP-003 — The equipment shall operate within its maximum rated payload or process load, with design load cases and safety factors established by engineering analysis.
+
+SP-004 — The equipment shall achieve the required positioning accuracy and repeatability, measured using a defined method and reference datum.
+
+SP-005 — Axis or mechanism travel, operating speed, acceleration, deceleration, and mechanical end stops shall be defined and respected during operation.
+
+4. MECHANICAL DESIGN
+SP-006 — The frame shall support the rated loads and foreseeable operating forces, with structural deflection kept within the limits required for function and accuracy.
+
+SP-007 — Frame material, moving-component materials, fasteners, bearings, guides, and actuators shall be selected, rated, and documented with required certificates and traceability.
+
+SP-008 — Critical dimensions, tolerances, surface finish, and welding or assembly procedures shall be specified on controlled drawings and verified during manufacture.
+
+SP-009 — Lubrication type, lubrication points, intervals, and wear-part inspection and replacement criteria shall be defined and documented.
+
+5. UTILITIES AND ENVIRONMENT
+SP-010 — Electrical supply voltage, phases, frequency, maximum connected load, and control/fieldbus interfaces shall be defined by the responsible electrical engineer.
+
+SP-011 — Pneumatic, hydraulic, or other utility pressure, flow, quality, and stored-energy isolation provisions shall be defined and documented.
+
+SP-012 — The equipment shall function within the specified ambient temperature, humidity, and dust/moisture/chemical exposure limits for the installation site.
+
+6. SAFETY AND ERGONOMICS
+SP-013 — Hazards shall be identified through a documented machine risk assessment, and guards, interlocks, protective devices, and emergency-stop functions appropriate to the identified risks shall be provided.
+
+SP-014 — The equipment shall prevent unexpected start-up and provide safe isolation of electrical, pneumatic, hydraulic, and other stored energy during maintenance.
+
+7. MAINTAINABILITY AND SERVICEABILITY
+SP-015 — Routine service points shall be accessible without unsafe reaching, and preventive-maintenance tasks, intervals, consumables, and special tools shall be documented.
+
+8. QUALITY, INSPECTION, AND TESTING
+SP-016 — Factory acceptance testing (FAT) shall verify the build against approved drawings, guards, interlocks, motion range, cycle time, load capability, accuracy, and process quality, with a documented endurance or production trial.
+
+SP-017 — Site acceptance testing (SAT) shall verify installation, anchoring, utilities, interfaces, and site safeguards, and shall confirm operator and maintenance training before formal acceptance.
+
+9. DOCUMENTATION AND DELIVERABLES
+SP-018 — Approved drawings, bill of materials, risk assessment, operating and maintenance manuals, lubrication schedule, and FAT/SAT reports shall be delivered before handover.
+
+10. APPLICABLE STANDARDS AND REGULATORY REVIEW
+The responsible engineering and compliance team shall identify the current standards and legal requirements that apply to the specific equipment and installation location, and shall confirm editions, national rules, and the conformity-assessment route before placing equipment into service.
+
+11. OPEN ITEMS FOR PROJECT DEFINITION
+Before these specifications can be approved, define the equipment function and process, workpiece range, throughput and accuracy targets, site layout and utilities, operating environment, risk assessment and safeguards, and FAT/SAT acceptance criteria.
+
+12. APPROVAL
+Prepared by: [Name / role]
+Reviewed by: [Name / role]
+Approved by: [Name / role]
+Date: [YYYY-MM-DD]
+Revision: [Revision]
+
+END OF DOCUMENT
