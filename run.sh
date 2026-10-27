@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 # Convenience launcher: loads GROQ_API_KEY from .env and runs the CLI.
 #
-#   ./run.sh                                  -> samples/sample_spec.txt -> outputs/model.html
-#   ./run.sh my_spec.txt                      -> my_spec.txt -> outputs/model.html
-#   ./run.sh my_spec.txt outputs/my_model.html -> my_spec.txt -> outputs/my_model.html
+# Specs live under specs/<kind>/*.txt, one subdirectory per kind of spec
+# (e.g. specs/sample/, specs/ecommerce/, specs/banking/...) so different
+# test specs don't pile up in one flat directory. Outputs mirror the same
+# <kind> subdirectory under outputs/, derived automatically from the input
+# path unless you pass an explicit output path.
+#
+#   ./run.sh                                        -> specs/sample/sample_spec.txt -> outputs/sample/model.html
+#   ./run.sh specs/sample/sample_spec.txt           -> outputs/sample/model.html (kind = "sample", derived)
+#   ./run.sh specs/ecommerce/checkout.txt           -> outputs/ecommerce/model.html (kind = "ecommerce", derived)
+#   ./run.sh specs/sample/sample_spec.txt out.html  -> out.html (explicit output always wins)
 #
 # Requires .venv (uv venv --python 3.13 .venv && uv pip install -r requirements.txt)
 # and a .env file containing GROQ_API_KEY=... in this directory.
@@ -21,7 +28,17 @@ fi
 
 export GROQ_API_KEY="$(grep '^GROQ_API_KEY=' .env | head -n1 | cut -d= -f2-)"
 
-INPUT="${1:-samples/sample_spec.txt}"
-OUTPUT="${2:-outputs/model.html}"
+INPUT="${1:-specs/sample/sample_spec.txt}"
 
+if [ -n "${2:-}" ]; then
+  OUTPUT="$2"
+elif [[ "$INPUT" == specs/* ]]; then
+  REL="${INPUT#specs/}"
+  KIND="$(dirname "$REL")"
+  OUTPUT="outputs/${KIND}/model.html"
+else
+  OUTPUT="outputs/model.html"
+fi
+
+mkdir -p "$(dirname "$OUTPUT")"
 .venv/bin/python -m app.main --input "$INPUT" --output "$OUTPUT"
