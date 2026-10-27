@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abstraction Model - {{ model.document }}</title>
+<script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
+<script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
+<script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
+<style>
+  :root { --border: #d9dde3; --muted: #5b6672; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1b2430; }
+  header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: #f7f9fb; }
+  header h1 { margin: 0 0 4px; font-size: 18px; }
+  header .meta { color: var(--muted); font-size: 13px; }
+  header .draft { margin-top: 6px; font-size: 12px; color: #8a5a00; background: #fff6e0; border: 1px solid #f0d9a0; padding: 5px 8px; border-radius: 4px; display: inline-block; }
+  .layout { display: flex; height: calc(100vh - 104px); }
+  aside { width: 420px; min-width: 320px; overflow: auto; border-right: 1px solid var(--border); padding: 12px 14px; }
+  aside h2 { font-size: 14px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid #eef1f4; vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  tr.feature-row { cursor: pointer; }
+  tr.feature-row:hover { background: #f2f7ff; }
+  tr.feature-row.active { background: #e3f0ff; }
+  .pill { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 11px; border: 1px solid; white-space: nowrap; }
+  .pill.functional { background: #e3f2fd; border-color: #1565c0; color: #0d47a1; }
+  .pill.non_functional { background: #f3e5f5; border-color: #6a1b9a; color: #4a148c; }
+  .pill.constraint { background: #fff3e0; border-color: #e65100; color: #bf360c; }
+  main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .toolbar { padding: 6px 12px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+  .toolbar button { font: inherit; font-size: 12px; padding: 3px 10px; border: 1px solid var(--border); background: #fff; border-radius: 4px; cursor: pointer; }
+  #cy { flex: 1; min-height: 320px; background: #fcfdfe; }
+  #details { border-top: 1px solid var(--border); padding: 8px 12px; min-height: 76px; max-height: 190px; overflow: auto; font-size: 12.5px; background: #fafbfc; }
+  #details .hint { color: var(--muted); }
+  #legend { border-top: 1px solid var(--border); padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; align-items: center; background: #f7f9fb; }
+  #legend .item { display: flex; align-items: center; gap: 6px; }
+  #legend .swatch { width: 28px; height: 0; border-top-width: 3px; border-top-style: solid; }
+  footer { border-top: 1px solid var(--border); padding: 8px 20px; background: #f7f9fb; }
+  footer summary { cursor: pointer; font-weight: 600; font-size: 13px; }
+  footer ul { margin: 8px 0 0; padding-left: 20px; font-size: 12.5px; color: #4a3b00; }
+  code { background: #eef1f4; padding: 0 3px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Abstraction Model &mdash; {{ model.document }}</h1>
+  <div class="meta">
+    Generated {{ generated_at_str }} &middot;
+    {{ feature_count }} features &middot;
+    {{ relationship_count }} relationships &middot;
+    {{ warning_count }} warnings
+  </div>
+  <div class="draft">Draft model produced by an LLM reading the spec. Spot-check it &mdash; it is a starting point for a test plan, not a verified model.</div>
+</header>
+
+<div class="layout">
+  <aside>
+    <h2>Features</h2>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Name</th><th>Category</th><th>Lines</th></tr>
+      </thead>
+      <tbody>
+      {% for f in model.features %}
+        <tr class="feature-row" data-fid="{{ f.id }}">
+          <td><strong>{{ f.id }}</strong></td>
+          <td>{{ f.name }}<div style="color:#5b6672">{{ f.description }}</div></td>
+          <td><span class="pill {{ f.category }}">{{ f.category }}</span></td>
+          <td>{{ f.source_lines[0] }}&ndash;{{ f.source_lines[1] }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </aside>
+
+  <main>
+    <div class="toolbar">
+      <button id="btn-relayout" type="button">Re-layout</button>
+      <button id="btn-fit" type="button">Fit</button>
+      <button id="btn-reset" type="button">Clear selection</button>
+      <span class="hint" style="color:#5b6672">Click a node (or a sidebar row) to highlight its relationships.</span>
+    </div>
+    <div id="cy"></div>
+    <div id="details"><span class="hint">No feature selected.</span></div>
+    <div id="legend"></div>
+  </main>
+</div>
+
+<footer>
+  <details{% if warning_count %} open{% endif %}>
+    <summary>Warnings ({{ warning_count }})</summary>
+    {% if warning_count %}
+    <ul>
+      {% for w in model.warnings %}
+      <li>{{ w }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p style="font-size:12.5px;color:#5b6672">No consistency or review warnings were raised.</p>
+    {% endif %}
+  </details>
+</footer>
+
+<script id="model-data" type="application/json">{{ model_json | safe }}</script>
+
+<script>
+(function () {
+  var modelData = JSON.parse(document.getElementById('model-data').textContent);
+
+  var EDGE_STYLES = {
+    depends_on:  { color: '#1f77b4', line: 'solid',  arrow: 'triangle', label: 'depends on' },
+    triggers:    { color: '#2ca02c', line: 'solid',  arrow: 'vee',      label: 'triggers' },
+    excludes:    { color: '#d62728', line: 'dashed', arrow: 'none',     label: 'excludes' },
+    shares_data: { color: '#ff7f0e', line: 'dotted', arrow: 'none',     label: 'shares data' },
+    part_of:     { color: '#9467bd', line: 'solid',  arrow: 'diamond',  label: 'part of' }
+  };
+  var CATEGORY_STYLES = {
+    functional:     { bg: '#e3f2fd', border: '#1565c0' },
+    non_functional: { bg: '#f3e5f5', border: '#6a1b9a' },
+    constraint:     { bg: '#fff3e0', border: '#e65100' }
+  };
+
+  var featureById = {};
+  var elements = [];
+  modelData.features.forEach(function (f) {
+    featureById[f.id] = f;
+    elements.push({ data: { id: f.id, label: f.id + ': ' + f.name, category: f.category } });
+  });
+  modelData.relationships.forEach(function (r, i) {
+    elements.push({ data: {
+      id: 'e' + i, source: r.source, target: r.target,
+      etype: r.type, rationale: r.rationale
+    } });
+  });
+
+  var style = [
+    { selector: 'node', style: {
+        'label': 'data(label)', 'text-wrap': 'wrap', 'text-max-width': '150px',
+        'text-valign': 'center', 'text-halign': 'center', 'font-size': '11px',
+        'shape': 'round-rectangle', 'width': 'label', 'height': 'label',
+        'padding': '10px', 'border-width': 2,
+        'background-color': '#eeeeee', 'border-color': '#999999' } },
+    { selector: 'edge', style: {
+        'curve-style': 'bezier', 'width': 2, 'arrow-scale': 1.1,
+        'label': 'data(etype)', 'font-size': '9px',
+        'text-background-color': '#ffffff', 'text-background-opacity': 0.85,
+        'text-background-padding': '2px', 'text-rotation': 'autorotate' } },
+    { selector: '.faded', style: { 'opacity': 0.12 } },
+    { selector: 'node.picked', style: { 'border-width': 4, 'border-color': '#111111' } }
+  ];
+  Object.keys(CATEGORY_STYLES).forEach(function (cat) {
+    style.push({ selector: 'node[category = "' + cat + '"]', style: {
+      'background-color': CATEGORY_STYLES[cat].bg,
+      'border-color': CATEGORY_STYLES[cat].border } });
+  });
+  Object.keys(EDGE_STYLES).forEach(function (t) {
+    var s = EDGE_STYLES[t];
+    style.push({ selector: 'edge[etype = "' + t + '"]', style: {
+      'line-color': s.color, 'target-arrow-color': s.color,
+      'target-arrow-shape': s.arrow, 'line-style': s.line, 'color': s.color } });
+  });
+
+  var cy = cytoscape({
+    container: document.getElementById('cy'),
+    elements: elements,
+    style: style,
+    layout: { name: 'grid' },
+    wheelSensitivity: 0.2
+  });
+
+  function runLayout() {
+    var opts = { name: 'dagre', rankDir: 'TB', nodeSep: 45, rankSep: 80, edgeSep: 20, padding: 30, fit: true };
+    try {
+      cy.layout(opts).run();
+    } catch (e) {
+      cy.layout({ name: 'breadthfirst', directed: true, padding: 30, spacingFactor: 1.2 }).run();
+    }
+  }
+  runLayout();
+
+  var detailsEl = document.getElementById('details');
+
+  function clearSelection() {
+    cy.elements().removeClass('faded');
+    cy.nodes().removeClass('picked');
+    document.querySelectorAll('tr.feature-row').forEach(function (row) { row.classList.remove('active'); });
+    detailsEl.innerHTML = '<span class="hint">No feature selected.</span>';
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function showDetails(fid) {
+    var f = featureById[fid];
+    if (!f) { return; }
+    var html = '<div><strong>' + escapeHtml(f.id) + ' &middot; ' + escapeHtml(f.name) + '</strong> ';
+    html += '<span class="pill ' + escapeHtml(f.category) + '">' + escapeHtml(f.category) + '</span> ';
+    html += '<span class="hint">lines ' + f.source_lines[0] + '-' + f.source_lines[1] + '</span></div>';
+    html += '<div>' + escapeHtml(f.description) + '</div>';
+    var rels = modelData.relationships.filter(function (r) { return r.source === fid || r.target === fid; });
+    if (rels.length === 0) {
+      html += '<div class="hint" style="margin-top:6px">No relationships (orphan).</div>';
+    } else {
+      html += '<ul style="margin:6px 0 0;padding-left:18px">';
+      rels.forEach(function (r) {
+        var color = (EDGE_STYLES[r.type] || {}).color || '#333';
+        html += '<li><code>' + escapeHtml(r.source) + ' &rarr; ' + escapeHtml(r.target) + '</code> ';
+        html += '<span style="color:' + color + ';font-weight:600">' + escapeHtml(r.type) + '</span> &mdash; ';
+        html += escapeHtml(r.rationale) + '</li>';
+      });
+      html += '</ul>';
+    }
+    detailsEl.innerHTML = html;
+  }
+
+  function selectNode(fid) {
+    var node = cy.getElementById(fid);
+    if (node.empty()) { return; }
+    cy.elements().addClass('faded');
+    node.closedNeighborhood().removeClass('faded');
+    cy.nodes().removeClass('picked');
+    node.addClass('picked');
+    document.querySelectorAll('tr.feature-row').forEach(function (row) {
+      row.classList.toggle('active', row.getAttribute('data-fid') === fid);
+    });
+    showDetails(fid);
+  }
+
+  cy.on('tap', 'node', function (evt) { selectNode(evt.target.id()); });
+  cy.on('tap', function (evt) { if (evt.target === cy) { clearSelection(); } });
+
+  document.querySelectorAll('tr.feature-row').forEach(function (row) {
+    row.addEventListener('click', function () { selectNode(row.getAttribute('data-fid')); });
+  });
+  document.getElementById('btn-relayout').addEventListener('click', runLayout);
+  document.getElementById('btn-fit').addEventListener('click', function () { cy.fit(undefined, 30); });
+  document.getElementById('btn-reset').addEventListener('click', clearSelection);
+
+  var legend = document.getElementById('legend');
+  var legendHtml = '<strong style="font-size:11px;color:#5b6672">EDGES</strong>';
+  Object.keys(EDGE_STYLES).forEach(function (t) {
+    var s = EDGE_STYLES[t];
+    legendHtml += '<span class="item"><span class="swatch" style="border-top-color:' + s.color +
+      ';border-top-style:' + s.line + '"></span>' + s.label + ' (' + t + ')</span>';
+  });
+  legendHtml += '<strong style="font-size:11px;color:#5b6672;margin-left:10px">NODES</strong>';
+  Object.keys(CATEGORY_STYLES).forEach(function (c) {
+    var cs = CATEGORY_STYLES[c];
+    legendHtml += '<span class="item"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:' +
+      cs.bg + ';border:2px solid ' + cs.border + '"></span>' + c + '</span>';
+  });
+  legend.innerHTML = legendHtml;
+
+  clearSelection();
+})();
+</script>
+</body>
+</html>

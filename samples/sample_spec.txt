@@ -1,0 +1,54 @@
+FleetLink Vehicle Telematics Platform
+Requirements Specification, version 0.9 (draft)
+
+1. Purpose
+
+This document describes the requirements for FleetLink, a web based platform
+that lets fleet operators monitor and manage commercial vehicles in real time.
+
+2. Functional Requirements
+
+2.1 Operator Sign-In
+Fleet operators must sign in with an email address and a password before any
+other part of the platform becomes available. A session expires after 30
+minutes of inactivity.
+
+2.2 Vehicle Registration
+A signed-in fleet operator can register a vehicle by entering its licence
+plate, its VIN and the identifier of the telematics device installed in it.
+The same VIN cannot be registered twice.
+
+2.3 Live Location Tracking
+Once a vehicle is registered, the platform receives a GPS position from that
+vehicle's telematics device every 10 seconds and shows the vehicle's current
+location on a map.
+
+2.4 Geofence Alerts
+A fleet operator can draw a geofence around an area on the map. Whenever a
+tracked vehicle crosses a geofence boundary, the platform raises a geofence
+alert for that vehicle.
+
+2.5 Maintenance Scheduling
+The platform schedules a maintenance reminder for each registered vehicle
+based on the odometer readings reported by that vehicle's telematics device.
+
+2.6 Daily Trip Reports
+At the end of each day the platform generates one trip report per vehicle
+containing the distance travelled, the idle time and every geofence alert
+raised for that vehicle during the day.
+
+2.7 Offline Buffering Mode
+If a telematics device loses network coverage it buffers its positions
+locally and uploads them once the connection returns. Offline buffering mode
+and live location tracking cannot both be active for the same vehicle: while
+a device is buffering, the map shows only its last known position.
+
+3. Non-functional Requirements
+
+3.1 Map Refresh Latency
+The live map must refresh within 2 seconds of the platform receiving a new
+position.
+
+3.2 Data Retention Policy
+Raw GPS positions must be retained for 90 days and trip reports must be
+retained for 7 years.
